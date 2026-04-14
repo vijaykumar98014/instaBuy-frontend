@@ -1,39 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { inventoryAPI,orderAPI} from "../../services/api";
+import Navbar from "../../components/Navbar/Navbar";
+import { toast } from "react-toastify";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import "./Inventory.css";
-
-// Toast System 
-function ToastContainer({ toasts }) {
-  const icons = { error: "⚠", success: "✓", info: "ℹ" };
-  return (
-    <div className="toast-container">
-      {toasts.map((t) => (
-        <div key={t.id} className={`toast toast--${t.type}`}>
-          <span>{icons[t.type]}</span>
-          {t.message}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Confirm Modal 
-function ConfirmModal({ message, onConfirm, onCancel }) {
-  return (
-    <div className="modal-overlay">
-      <div className="modal-box">
-        <div className="modal-box__icon">🗑</div>
-        <h3 className="modal-box__title">Confirm Delete</h3>
-        <p className="modal-box__msg">{message}</p>
-        <div className="modal-box__btns">
-          <button className="modal-box__cancel" onClick={onCancel}>Cancel</button>
-          <button className="modal-box__delete" onClick={onConfirm}>Delete</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── Skeleton Row 
 function SkeletonRow() {
@@ -66,7 +37,6 @@ function Inventory() {
   const [price,         setPrice]         = useState("");
   const [quantity,      setQuantity]      = useState("");
   const [editId,        setEditId]        = useState(null);
-  const [toasts,        setToasts]        = useState([]);
   const [confirm,       setConfirm]       = useState(null);
   const [search,        setSearch]        = useState("");
   const [submitting,    setSubmitting]    = useState(false);
@@ -81,13 +51,6 @@ function Inventory() {
   //console.log(userName);
   const navigate = useNavigate();
 
-  // Toasts 
-  const addToast = (message, type = "success") => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
-  };
-
   //  API Calls 
   const fetchProducts = async () => {
     setLoading(true);
@@ -95,68 +58,68 @@ function Inventory() {
       const res = await inventoryAPI.get("/api/inventory/products");
       setProducts(res.data);
     } catch {
-      addToast("Failed to load products", "error");
+      toast.error("Failed to load products");
     } finally {
       setLoading(false);
     }
   };
 
   const addProduct = async () => {
-    if (!name || price <= 0 || quantity <= 0) { addToast("Enter Valid inputs", "error"); return; }
+    if (!name || price <= 0 || quantity <= 0) { toast.error("Enter Valid inputs");; return; }
     
     setSubmitting(true);
     try {
       await inventoryAPI.post("/api/inventory/admin/add", { name, price, quantity });
-      addToast(`"${name}" added to inventory`);
+      toast.success(`"${name}" added to inventory`);
       clearForm();
       fetchProducts();
       setFormOpen(false);
-    } catch { addToast("Failed to add product", "error"); }
+    } catch { toast.error("Failed to add product"); }
     finally   { setSubmitting(false); }
   };
 
   const deleteProduct = async (id) => {
     try {
       await inventoryAPI.delete(`/api/inventory/admin/delete?productId=${id}`);
-      addToast("Product removed from inventory");
+      toast.info("Product removed from inventory");
       fetchProducts();
-    } catch { addToast("Failed to delete product", "error"); }
+    } catch { toast.error("Failed to delete product"); }
     setConfirm(null);
   };
 
   const increaseStock = async (id, pName) => {
     try {
       await inventoryAPI.post(`/api/inventory/admin/increase?productId=${id}&quantity=1`);
-      addToast(`Stock increased for "${pName}"`, "info");
+      toast.info(`Stock increased for "${pName}"`);
       fetchProducts();
-    } catch { addToast("Failed to increase stock", "error"); }
+    } catch { toast.error("Failed to increase stock"); }
   };
 
   const reduceStock = async (id, pName) => {
     try {
       await inventoryAPI.post(`/api/inventory/reduce?productId=${id}&quantity=1`);
-      addToast(`Stock reduced for "${pName}"`, "info");
+      toast.info(`Stock reduced for "${pName}"`);
       fetchProducts();
-    } catch { addToast("Failed to reduce stock", "error"); }
+    } catch { toast.error("Failed to reduce stock"); }
   };
 
   const updateProduct = async () => {
-    if (!name || !price || !quantity) { addToast("All fields are required", "error"); return; }
+    if (!name || !price || !quantity) { toast.error("All fields are required"); return; }
     setSubmitting(true);
     try {
       await inventoryAPI.post(`/api/inventory/admin/update?id=${editId}`, { name, price, quantity });
-      addToast(`"${name}" updated successfully`);
+      toast.success(`"${name}" updated successfully`);
       clearForm();
       fetchProducts();
       setFormOpen(false);
-    } catch { addToast("Failed to update product", "error"); }
+    } catch { toast.error("Failed to update product"); }
     finally   { setSubmitting(false); }
   };
 
   const addToCart = async (p) => {
     const uid = localStorage.getItem("userId") ;
     //console.log(uid);
-    if (p.quantity <= 0) { addToast("Product is out of stock", "error"); return; }
+    if (p.quantity <= 0) { toast.error("Product is out of stock"); return; }
     try {
       const { default: axios } = await import("axios");
       await orderAPI.post(`/api/orders/cart/add/${uid}`, {
@@ -164,8 +127,8 @@ function Inventory() {
         quantity:  1,
         price:     p.price,
       });
-      addToast(`"${p.name}" added to cart 🛒`);
-    } catch { addToast("Failed to add to cart", "error"); }
+      toast.success(`"${p.name}" added to cart 🛒`);
+    } catch { toast.error("Failed to add to cart"); }
   };
 
   //  Helpers 
@@ -211,30 +174,11 @@ function Inventory() {
     <div className="inv-wrapper">
 
       {/* ── Navbar ─────────────────────────────────────────────── */}
-      <nav className="inv-nav">
-        <div className="inv-nav__left">
-          <button className="inv-nav__back-btn" onClick={() => navigate("/home")}>← Home</button>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div className="inv-nav__logo-icon">🛍</div>
-            <span className="inv-nav__logo-text">
-              Insta<span>Buy</span>
-            </span>
-          </div>
-        </div>
-
-        <div className="inv-nav__right">
-          <span className="inv-nav__count">{products.length} products</span>
-          <span className={`inv-nav__role-badge ${role === "ADMIN" ? "inv-nav__role-badge--admin" : "inv-nav__role-badge--user"}`}>
-            {role === "ADMIN" ? "🛡" : "👤"} {userName}
-          </span>
-          <span className="inv-nav__wallet-badge">
-              💰 ₹{wallet}
-          </span>
-          {role !== "ADMIN" && (<button className="inv-nav__cart-btn"    onClick={() => navigate("/cart")}>🛒 Cart</button>)}
-          <button className="inv-nav__orders-btn"  onClick={() => navigate("/orders")}>📋 Orders</button>
-          <button className="inv-nav__refresh-btn" onClick={fetchProducts}>⟳ Refresh</button>
-        </div>
-      </nav>
+      <Navbar
+        showBackButton={true}
+        showCount={true}
+        countText={`${products.length} products`}
+      />
 
       <div className="inv-inner">
 
@@ -428,7 +372,6 @@ function Inventory() {
           onCancel={() => setConfirm(null)}
         />
       )}
-      <ToastContainer toasts={toasts} />
     </div>
   );
 }

@@ -1,0 +1,118 @@
+/* ── Modal Overlay ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Modal Box ── */
+.modal-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: scale(0.9) translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-box__icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.modal-box__title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.modal-box__msg {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+/* ── Modal Buttons ── */
+.modal-box__btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.modal-box__cancel,
+.modal-box__delete {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'DM Sans', sans-serif;
+  border: none;
+}
+
+.modal-box__cancel {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.modal-box__cancel:hover {
+  background: var(--surface-soft);
+  border-color: var(--accent);
+}
+
+.modal-box__delete {
+  background: var(--danger);
+  color: var(--text);
+}
+
+.modal-box__delete:hover {
+  background: var(--danger);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 101, 132, 0.3);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .modal-box {
+    padding: 24px;
+    margin: 20px;
+  }
+
+  .modal-box__btns {
+    flex-direction: column;
+  }
+
+  .modal-box__cancel,
+  .modal-box__delete {
+    width: 100%;
+  }
+}

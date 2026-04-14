@@ -3,9 +3,9 @@
 /* ── Page ── */
 .home-page {
   min-height: 100vh;
-  background: #0a0a0f;
+  background: var(--bg);
   font-family: 'DM Sans', sans-serif;
-  color: #f0f0f8;
+  color: var(--text);
   position: relative;
   overflow: hidden;
 }
@@ -28,9 +28,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 48px;
-  background: rgba(10, 10, 15, 0.8);
+  background: var(--nav-bg);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -57,11 +57,11 @@
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   font-weight: 700;
-  color: #f0f0f8;
+  color: var(--text);
 }
 
 .home-nav-brand-accent {
-  color: #6c63ff;
+  color: var(--accent);
 }
 
 .home-nav-right {
@@ -79,15 +79,15 @@
 }
 
 .home-nav-badge--admin {
-  background: rgba(255, 101, 132, 0.15);
-  color: #ff6584;
-  border: 1px solid rgba(255, 101, 132, 0.3);
+  background: var(--danger);
+  color: var(--text);
+  border: 1px solid var(--danger);
 }
 
 .home-nav-badge--user {
-  background: rgba(108, 99, 255, 0.15);
-  color: #6c63ff;
-  border: 1px solid rgba(108, 99, 255, 0.3);
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent);
 }
 
 .home-nav__wallet-badge {
@@ -95,14 +95,14 @@
   border-radius: 20px;
   font-weight: 600;
   font-size: 14px;
-  background: rgba(0, 255, 150, 0.1);
-  color: #00ffa3;
-  border: 1px solid rgba(0, 255, 150, 0.3);
+  background: var(--success);
+  color: var(--text);
+  border: 1px solid var(--success);
   transition: 0.3s ease;
 }
 
 .home-nav__wallet-badge:hover {
-  background: rgba(0, 255, 150, 0.2);
+  background: var(--success);
   transform: translateY(-1px);
 }
 
@@ -118,21 +118,21 @@
 }
 
 .home-nav-btn--inventory {
-  background: rgba(108, 99, 255, 0.15);
-  color: #6c63ff;
-  border: 1px solid rgba(108, 99, 255, 0.2);
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent);
 }
 
 .home-nav-btn--logout {
   background: transparent;
-  color: #9090b0;
-  border: 1px solid #2a2a3a;
+  color: var(--muted);
+  border: 1px solid var(--border);
 }
 
 .home-nav-btn--logout:hover {
-  background: rgba(255, 77, 109, 0.15) !important;
-  color: #ff4d6d !important;
-  border-color: rgba(255, 77, 109, 0.3) !important;
+  background: var(--danger) !important;
+  color: var(--text) !important;
+  border-color: var(--danger) !important;
 }
 
 /* ── Hero ── */
@@ -152,12 +152,12 @@
   align-items: center;
   gap: 8px;
   padding: 6px 16px;
-  background: rgba(108, 99, 255, 0.1);
-  border: 1px solid rgba(108, 99, 255, 0.2);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
-  color: #6c63ff;
+  color: var(--accent);
   margin-bottom: 32px;
   letter-spacing: 0.3px;
 }
@@ -179,7 +179,7 @@
 }
 
 .home-hero-sub {
-  color: #9090b0;
+  color: var(--muted);
   font-size: 18px;
   max-width: 500px;
   line-height: 1.7;
@@ -258,12 +258,12 @@
   font-family: 'Playfair Display', serif;
   font-size: 36px;
   font-weight: 700;
-  color: #f0f0f8;
+  color: var(--text);
   line-height: 1;
 }
 
 .home-stat-label {
-  color: #9090b0;
+  color: var(--muted);
   font-size: 13px;
   margin-top: 6px;
 }
@@ -282,7 +282,7 @@
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 40px;
-  color: #f0f0f8;
+  color: var(--text);
 }
 
 .home-cards-grid {
@@ -292,8 +292,8 @@
 }
 
 .home-card {
-  background: #16161f;
-  border: 1px solid #2a2a3a;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 32px;
   transition: all 0.3s ease;
@@ -322,12 +322,12 @@
 .home-card-title {
   font-size: 18px;
   font-weight: 600;
-  color: #f0f0f8;
+  color: var(--text);
   margin-bottom: 10px;
 }
 
 .home-card-desc {
-  color: #9090b0;
+  color: var(--muted);
   font-size: 14px;
   line-height: 1.7;
 }
@@ -348,12 +348,12 @@
 
 /* ── Footer ── */
 .home-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--border);
   padding: 32px 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #5a5a7a;
+  color: var(--muted);
   font-size: 13px;
   position: relative;
   z-index: 1;

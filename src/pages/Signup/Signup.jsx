@@ -1,15 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { userAPI } from "../../services/api";
+import { toast } from "react-toastify";
+import ThemeToggle from "../../components/ThemeToggle";
 import "./Signup.css";
-
-function Toast({ message, type }) {
-  return (
-    <div className={`signup-toast ${type}`}>
-      {type === "error" ? "⚠ " : "✓ "}{message}
-    </div>
-  );
-}
 
 function Signup() {
   const [username, setUsername] = useState("");
@@ -17,33 +11,40 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("USER");
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState(null);
-  const navigate = useNavigate();
 
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+  const navigate = useNavigate();
 
   const handleSignup = async () => {
     if (!username || !email || !password || !role) {
-      showToast("All fields are required", "error"); return;
+      toast.error("All fields are required");
+      return;
     }
+
     if (!email.includes("@gmail")) {
-      showToast("Please enter a valid email", "error"); return;
+      toast.error("Please enter a valid email");
+      return;
     }
+
     if (password.length < 6) {
-      showToast("Password must be at least 6 characters", "error"); return;
+      toast.error("Password must be at least 6 characters");
+      return;
     }
+
     setLoading(true);
+
     try {
       await userAPI.post("/api/users/register", {
-        name: username, email, password, role,
+        name: username,
+        email,
+        password,
+        role,
       });
-      showToast("Account created successfully!");
+
+      toast.success("Account created successfully!");
+
       setTimeout(() => navigate("/login"), 900);
     } catch {
-      showToast("Signup failed. Try again.", "error");
+      toast.error("Signup failed. Try again.");
     } finally {
       setLoading(false);
     }
@@ -90,9 +91,15 @@ function Signup() {
 
       {/* Right Panel */}
       <div className="signup-right">
+        <div className="signup-theme-row">
+          <ThemeToggle />
+        </div>
+
         <div className="signup-form-box">
           <h2 className="signup-form-title">Create account</h2>
-          <p className="signup-form-sub">Fill in the details to get started</p>
+          <p className="signup-form-sub">
+            Fill in the details to get started
+          </p>
 
           <div className="signup-input-wrap">
             <label className="signup-label">Username</label>
@@ -103,10 +110,6 @@ function Signup() {
               placeholder="Your name"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              autoComplete="off"
-              name="instabuy-username-x9k"
-              readOnly
-              onFocus={(e) => e.target.removeAttribute("readOnly")}
             />
           </div>
 
@@ -119,10 +122,6 @@ function Signup() {
               placeholder="you12345@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              autoComplete="off"
-              name="instabuy-email-x9k"
-              readOnly
-              onFocus={(e) => e.target.removeAttribute("readOnly")}
             />
           </div>
 
@@ -135,25 +134,8 @@ function Signup() {
               placeholder="Min. 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              name="instabuy-password-x9k"
-              readOnly
-              onFocus={(e) => e.target.removeAttribute("readOnly")}
             />
           </div>
-
-          {/* <div className="signup-input-wrap">
-            <label className="signup-label">Account Role</label>
-            <span className="signup-input-icon">🎛</span>
-            <select
-              className="signup-select"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="USER">👤 User — Browse & Shop</option>
-              <option value="ADMIN">🛡 Admin — Manage Inventory</option>
-            </select>
-          </div> */}
 
           <button
             className="signup-primary-btn"
@@ -165,7 +147,9 @@ function Signup() {
                 <span className="signup-spinner" />
                 Creating account...
               </>
-            ) : "Create Account →"}
+            ) : (
+              "Create Account →"
+            )}
           </button>
 
           <div className="signup-divider">
@@ -176,18 +160,15 @@ function Signup() {
 
           <p className="signup-bottom-text">
             Already have an account?{" "}
-            <button className="signup-bottom-link" onClick={() => navigate("/login")}>
+            <button
+              className="signup-bottom-link"
+              onClick={() => navigate("/login")}
+            >
               Sign in
             </button>
           </p>
         </div>
       </div>
-
-      {toast && (
-        <div className="signup-toast-wrapper">
-          <Toast message={toast.message} type={toast.type} />
-        </div>
-      )}
     </div>
   );
 }

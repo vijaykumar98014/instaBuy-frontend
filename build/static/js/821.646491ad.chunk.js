@@ -1,0 +1,2 @@
+"use strict";(globalThis.webpackChunkinstabuy_frontend=globalThis.webpackChunkinstabuy_frontend||[]).push([[821],{821(e,a,o){o.d(a,{default:()=>r.A});var r=o(213);const{Axios:s,AxiosError:t,CanceledError:n,isCancel:i,CancelToken:l,VERSION:d,all:c,Cancel:u,isAxiosError:C,spread:A,toFormData:b,AxiosHeaders:p,HttpStatusCode:f,formToJSON:g,getAdapter:h,mergeConfig:k}=r.A}}]);
+//# sourceMappingURL=821.646491ad.chunk.js.map

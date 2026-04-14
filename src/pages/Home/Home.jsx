@@ -1,19 +1,13 @@
 import { useNavigate } from "react-router-dom";
+import Navbar from "../../components/Navbar/Navbar";
+import { toast } from "react-toastify";
 import "./Home.css";
-// import { userAPI, inventoryAPI } from "../../services/api";
 
 function Home() {
   const navigate = useNavigate();
   const role = localStorage.getItem("role") || "USER";
   const userName = localStorage.getItem("userName");
   const wallet = localStorage.getItem("wallet");
-  
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    navigate("/login");
-  };
 
   const cards = [
     {
@@ -65,41 +59,7 @@ function Home() {
       <div className="home-glow" />
 
       {/* Navbar */}
-      <nav className="home-nav">
-        <div className="home-nav-brand">
-          <div className="home-nav-logo">🛍</div>
-          <span className="home-nav-brand-name">
-            Insta<span className="home-nav-brand-accent">Buy</span>
-          </span>
-        </div>
-
-        <div className="home-nav-right">
-          <span
-            className={`home-nav-badge ${
-              role === "ADMIN" ? "home-nav-badge--admin" : "home-nav-badge--user"
-            }`}
-          >
-            {role === "ADMIN" ? "🛡" : "👤"} {userName}
-          </span>
-          <span className="home-nav__wallet-badge">
-            💰 ₹{wallet}
-         </span>
-
-          <button
-            className="home-nav-btn home-nav-btn--inventory"
-            onClick={() => navigate("/inventory")}
-          >
-            📦 Inventory
-          </button>
-
-          <button
-            className="home-nav-btn home-nav-btn--logout"
-            onClick={handleLogout}
-          >
-            Sign Out
-          </button>
-        </div>
-      </nav>
+      <Navbar showInventoryButton={true} />
 
       {/* Hero */}
       <section className="home-hero">
@@ -120,7 +80,7 @@ function Home() {
           </button>
           {role === "ADMIN" && (
             <button
-              className="home-sec-btn"
+              className="home-primary-btn"
               onClick={() => navigate("/inventory")}
             >
               🛡 Admin Panel

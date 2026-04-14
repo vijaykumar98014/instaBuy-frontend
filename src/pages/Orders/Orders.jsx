@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { useNavigate } from "react-router-dom";
 import { orderAPI, userAPI } from "../../services/api";
+import Navbar from "../../components/Navbar/Navbar";
+import { toast } from "react-toastify";
 import "./Orders.css";
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
@@ -32,21 +36,6 @@ function formatDate(dateStr) {
     day: "2-digit", month: "short", year: "numeric",
     hour: "2-digit", minute: "2-digit",
   });
-}
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
-function ToastContainer({ toasts }) {
-  const icons = { success: "✓", error: "⚠", info: "ℹ" };
-  return (
-    <div className="ord-toast-container">
-      {toasts.map((t) => (
-        <div key={t.id} className={`ord-toast ord-toast--${t.type}`}>
-          <span>{icons[t.type]}</span>
-          {t.message}
-        </div>
-      ))}
-    </div>
-  );
 }
 
 // ─── Confirm Modal ────────────────────────────────────────────────────────────
@@ -128,6 +117,61 @@ function OrderCard({ order, role, onCancel, onStatusUpdate, onEditOpen, onRefund
   const isCancelled = order.orderStatus?.toUpperCase() === "CANCELLED";
   const isDelivered = order.orderStatus?.toUpperCase() === "DELIVERED";
   const canAct = !isCancelled && !isDelivered;
+  
+
+const downloadReceipt = (order) => {
+
+  const items = order.items || [];
+
+  const doc = new jsPDF();
+
+  // 🧾 Title
+  doc.setFontSize(16);
+  doc.text("TAX INVOICE", 80, 15);
+
+  // 🏢 Seller Info
+  doc.setFontSize(10);
+  doc.text("Sold By: InstaBuy Pvt Ltd", 14, 25);
+  doc.text("GSTIN: 22AAAAA0000A1Z5", 14, 30);
+
+  // 📦 Order Info
+  doc.text(`Order ID: ${order.orderId}`, 140, 25);
+  doc.text(`Date: ${new Date(order.orderDate).toLocaleDateString()}`, 140, 30);
+
+  // 👤 Customer
+  doc.text("Bill To:", 14, 40);
+  doc.text(`${order.shippingAddress}`, 14, 45);
+  doc.text(`Phone: ${order.phone}`, 14, 50);
+
+  // 📊 Table
+  const tableData = items.map((item) => [
+    item.productName,
+    item.quantity,
+    item.price,
+    item.quantity * item.price
+  ]);
+
+  autoTable(doc, {
+    startY: 60,
+    head: [["Product", "Qty", "Price", "Total"]],
+    body: tableData,
+  });
+
+  // 💰 Total
+  const finalY = doc.lastAutoTable.finalY + 10;
+
+  doc.text(`Grand Total: ₹${order.totalAmount}`, 140, finalY);
+
+  // 💳 Payment
+  doc.text(`Payment: ${order.paymentStatus}`, 14, finalY + 10);
+  doc.text(`Status: ${order.orderStatus}`, 14, finalY + 15);
+
+  // ✍️ Signature
+  doc.text("Authorized Signatory", 140, finalY + 25);
+
+  // 📥 Save
+  doc.save(`invoice_${order.orderId}.pdf`);
+};
 
   return (
     <div className="ord-card" style={{ animationDelay: `${index * 0.06}s` }}>
@@ -215,6 +259,17 @@ function OrderCard({ order, role, onCancel, onStatusUpdate, onEditOpen, onRefund
                     ✕ Cancel Order
                   </button>
                 )}
+                {(order.orderStatus === "CONFIRMED" || order.orderStatus === "DELIVERED") && (
+    <button
+      className="ord-receipt-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        downloadReceipt(order);
+      }}
+    >
+      📄 Invice
+    </button>
+  )}
               </>
             )}
 
@@ -278,7 +333,6 @@ function OrderCard({ order, role, onCancel, onStatusUpdate, onEditOpen, onRefund
 function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toasts, setToasts] = useState([]);
   const [confirm, setConfirm] = useState(null);
   const [editOrder, setEditOrder] = useState(null);
   const [filter, setFilter] = useState("ALL");
@@ -288,12 +342,6 @@ function Orders() {
   const userId = localStorage.getItem("userId");
   const userName = localStorage.getItem("userName");
   const wallet = localStorage.getItem("wallet");
-
-  const addToast = (message, type = "success") => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
-  };
 
   // ── GET /api/order-items/user/{userId} ────────────────────────────────────
   const fetchOrders = async () => {
@@ -309,7 +357,7 @@ function Orders() {
 
       setOrders(res.data || []);
     } catch {
-      addToast("Failed to load orders", "error");
+      toast.error("Failed to load orders");
     } finally {
       setLoading(false);
     }
@@ -322,30 +370,30 @@ function Orders() {
 
     try {
       await orderAPI.post(`/api/order-items/cancel/${orderId}`);
-      addToast("Order cancelled successfully");
+      toast.success("Order cancelled successfully");
       setTimeout(() => {
         setConfirm(null);
       }, 1000);
 
       fetchOrders();
     } catch {
-      addToast("Failed to cancel order", "error");
+      toast.error("Failed to cancel order");
     }
   };
 
   // ── PUT /api/order-items/update/{orderId}?address=X&phone=Y ──────────────
   const updateDetails = async (orderId, address, phone) => {
-    if (!address.trim()) { addToast("Address is required", "error"); return; }
-    if (!phone.trim()) { addToast("Phone is required", "error"); return; }
+    if (!address.trim()) { toast.error("Address is required"); return; }
+    if (!phone.trim()) { toast.error("Phone is required"); return; }
     try {
       await orderAPI.put(
         `/api/order-items/update/${orderId}?address=${encodeURIComponent(address)}&phone=${phone}`
       );
-      addToast("Delivery details updated ✓", "info");
+      toast.info("Delivery details updated ✓");
       setEditOrder(null);
       fetchOrders();
     } catch {
-      addToast("Failed to update details", "error");
+      toast.error("Failed to update details");
     }
   };
 
@@ -353,10 +401,10 @@ function Orders() {
   const updateStatus = async (orderId, status) => {
     try {
       await orderAPI.put(`/api/order-items/status/${orderId}?status=${status}`);
-      addToast(`Order #${orderId} → ${status}`, "info");
+      toast.info(`Order #${orderId} → ${status}`);
       fetchOrders();
     } catch {
-      addToast("Failed to update status", "error");
+      toast.error("Failed to update status");
     }
   };
 
@@ -371,19 +419,20 @@ function Orders() {
 
       //  UPDATE wallet
       localStorage.setItem("wallet", updatedWallet);
-      addToast("Refund successful 💸", "success");
+      toast.success("Refund successful 💸");
       fetchOrders();
     } catch {
-      addToast("Refund failed", "error");
+      toast.error("Refund failed");
     }
   };
 
   useEffect(() => { fetchOrders(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const FILTERS = ["ALL", "CREATED", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
-  const filtered = filter === "ALL"
-    ? orders
-    : orders.filter((o) => o.orderStatus?.toUpperCase() === filter);
+  const filtered = (filter === "ALL"
+  ? orders
+  : orders.filter((o) => o.orderStatus?.toUpperCase() === filter)
+).sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
 
   const summaryCards = [
     { label: "Total Orders", value: orders.length, icon: "📋", bg: "rgba(108,99,255,0.12)", color: "#6c63ff" },
@@ -398,25 +447,10 @@ function Orders() {
       <div className="ord-glow-2" />
 
       {/* ── Navbar ── */}
-      <nav className="ord-nav">
-        <div className="ord-nav__left">
-          <button className="ord-nav__back-btn" onClick={() => navigate("/home")}>← Home</button>
-          <div className="ord-nav__brand">
-            <div className="ord-nav__logo-icon">🛍</div>
-            <span className="ord-nav__logo-text">Insta<span>Buy</span></span>
-          </div>
-        </div>
-        <div className="ord-nav__right">
-          <span className={`ord-nav__role-badge ${role === "ADMIN" ? "ord-nav__role-badge--admin" : "ord-nav__role-badge--user"}`}>
-            {role === "ADMIN" ? "🛡" : "👤"} {userName}
-          </span>
-          <span className="orders-nav__wallet-badge">
-            💰 ₹{wallet}
-          </span>
-          {role !== "ADMIN" && (<button className="ord-nav__cart-btn" onClick={() => navigate("/cart")}>🛒 Cart</button>)}
-          <button className="ord-nav__refresh-btn" onClick={fetchOrders}>⟳ Refresh</button>
-        </div>
-      </nav>
+      <Navbar
+        showBackButton={true}
+        showOrdersButton={false}
+      />
 
       {/* ── Content ── */}
       <div className="ord-content">
@@ -518,7 +552,6 @@ function Orders() {
         />
       )}
 
-      <ToastContainer toasts={toasts} />
     </div>
   );
 }

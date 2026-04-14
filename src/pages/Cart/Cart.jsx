@@ -2,29 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { orderAPI } from "../../services/api";
 import { userAPI } from "../../services/api";
+import Navbar from "../../components/Navbar/Navbar";
+import { toast } from "react-toastify";
 import "./Cart.css";
-
-//  Toast System 
-function ToastContainer({ toasts }) {
-  const icons = { success: "✓", error: "⚠", info: "ℹ" };
-  return (
-    <div className="cart-toast-container">
-      {toasts.map((t) => (
-        <div key={t.id} className={`cart-toast cart-toast--${t.type}`}>
-          <span>{icons[t.type]}</span>
-          {t.message}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 //  Main Component 
 function Cart() {
   const [cartItems,   setCartItems]   = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [placing,     setPlacing]     = useState(false);
-  const [toasts,      setToasts]      = useState([]);
   const [address,     setAddress]     = useState("");
   const [phone,       setPhone]       = useState("");
 
@@ -38,13 +24,6 @@ function Cart() {
   const userId = localStorage.getItem("userId");
   //const wallet = localStorage.getItem("wallet");
 
-  //  Toasts 
-  const addToast = (message, type = "success") => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
-  };
-
   //  Fetch Cart   
   const fetchCart = async () => {
     setLoading(true);
@@ -52,7 +31,7 @@ function Cart() {
       const res = await orderAPI.get(`/api/orders/cart/${userId}`);
       setCartItems(res.data || []);
     } catch {
-      addToast("Failed to load cart", "error");
+      toast.error("Failed to load cart");
     } finally {
       setLoading(false);
     }
@@ -63,10 +42,10 @@ const removeItem = async (productId) => {
   setRemovingId(productId);
   try {
     await orderAPI.get(`/api/orders/cart/remove/${userId}/${productId}`);
-    addToast("Item removed ❌", "info");
+    toast.info("Item removed ❌");
     fetchCart();
   } catch {
-    addToast("Failed to remove item", "error");
+    toast.error("Failed to remove item");
   } finally {
     setRemovingId(null);
   }
@@ -76,24 +55,24 @@ const removeItem = async (productId) => {
   //    Body: { shippingAddress, phone }  (matches OrderRequest DTO)
   const placeOrder = async () => {
   if (cartItems.length === 0) {
-    addToast("Your cart is empty", "error");
+    toast.error("Your cart is empty");
     return;
   }
   if (!address.trim()) {
-    addToast("Please enter a shipping address", "error");
+    toast.error("Please enter a shipping address");
     return;
   }
   if (!phone.trim()) {
-    addToast("Please enter a phone number", "error");
+    toast.error("Please enter a phone number");
     return;
   }
   if (!/^\d{10}$/.test(phone)) {
-  addToast("Phone number must be exactly 10 digits", "error");  
+  toast.error("Phone number must be exactly 10 digits");
   return;
   
  }
  if (wallet < total) {
-    addToast("❌ Insufficient wallet balance", "error");
+    toast.error("❌ Insufficient wallet balance");
     return;
   }
   setPlacing(true);
@@ -106,7 +85,7 @@ const removeItem = async (productId) => {
 
  if (res?.data?.status === "CONFIRMED") {
 
-  addToast("Payment successful ✅ Order placed 🎉", "success");
+  toast.success("Payment successful ✅ Order placed 🎉");
 
   //  FETCH LATEST WALLET FROM BACKEND
   const userRes = await userAPI.get(`/api/users/${userId}`);
@@ -123,7 +102,7 @@ const removeItem = async (productId) => {
 }
 
 } catch (err) {
-   addToast("❌ Payment failed. Try again", "error");
+   toast.error("❌ Payment failed. Try again");
 }finally{
   setPlacing(false);
 }
@@ -142,37 +121,14 @@ const removeItem = async (productId) => {
       <div className="cart-glow-2" />
 
       {/* ── Navbar ─────────────────────────────────────────────────────────── */}
-      <nav className="cart-nav">
-        <div className="cart-nav__left">
-          <button className="cart-nav__back-btn" onClick={() => navigate("/inventory")}>
-            ← Inventory
-          </button>
-          <div className="cart-nav__brand">
-            <div className="cart-nav__logo-icon">🛍</div>
-            <span className="cart-nav__logo-text">
-              Insta<span>Buy</span>
-            </span>
-          </div>
-        </div>
-
-        <div className="cart-nav__right">
-          <span className="cart-nav__count">
-            {cartItems.length} item{cartItems.length !== 1 ? "s" : ""} in cart
-          </span>
-          <span className={`inv-nav__role-badge ${role === "ADMIN" ? "inv-nav__role-badge--admin" : "inv-nav__role-badge--user"}`}>
-            {role === "ADMIN" ? "🛡" : "👤"} {userName}
-          </span>
-          <span className="inv-nav__wallet-badge">
-              💰 ₹{wallet}
-          </span>
-          <button
-            className="cart-nav__orders-btn"
-            onClick={() => navigate("/orders")}
-          >
-            📋 My Orders
-          </button>
-        </div>
-      </nav>
+      <Navbar
+        showBackButton={true}
+        backText="← Inventory"
+        backPath="/inventory"
+        showCount={true}
+        countText={`${cartItems.length} item${cartItems.length !== 1 ? "s" : ""} in cart`}
+        showCartButton={false}
+      />
 
       {/* ── Main Content ─────────────────────────────────────────────────────── */}
       <div className="cart-content">
@@ -322,8 +278,6 @@ const removeItem = async (productId) => {
           </div>
         )}
       </div>
-
-      <ToastContainer toasts={toasts} />
     </div>
   );
 }

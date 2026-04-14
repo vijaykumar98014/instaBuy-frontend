@@ -1,53 +1,52 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { userAPI } from "../../services/api";
+import { toast } from "react-toastify";
+import ThemeToggle from "../../components/ThemeToggle";
 import "./Login.css";
-
-function Toast({ message, type }) {
-  return (
-    <div className={`login-toast ${type}`}>
-      {type === "error" ? "⚠ " : "✓ "}{message}
-    </div>
-  );
-}
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState(null);
-  const navigate = useNavigate();
 
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     if (!email || !password) {
-      showToast("All fields are required", "error"); return;
+      toast.error("All fields are required");
+      return;
     }
+
     setLoading(true);
+
     try {
-      const res = await userAPI.post("/api/users/login", { email, password });
-      //console.log(res);
+      const res = await userAPI.post("/api/users/login", {
+        email,
+        password,
+      });
 
       localStorage.setItem("userId", res.data.id);
-      localStorage.setItem("role", res.data.role || (email.includes("admin") ? "ADMIN" : "USER"));
+      localStorage.setItem(
+        "role",
+        res.data.role || (email.includes("admin") ? "ADMIN" : "USER")
+      );
       localStorage.setItem("userName", res.data.name);
       localStorage.setItem("wallet", res.data.walletBalance);
-      //console.log(res);
 
-      showToast(res.data.message || "Login successful!");
+      toast.success(res.data.message || "Login successful!");
+
       setTimeout(() => navigate("/home"), 800);
     } catch {
-      showToast("Login failed. Check your credentials.", "error");
+      toast.error("Login failed. Check your credentials.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyDown = (e) => { if (e.key === "Enter") handleLogin(); };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleLogin();
+  };
 
   return (
     <div className="login-page">
@@ -88,9 +87,15 @@ function Login() {
 
       {/* Right Panel */}
       <div className="login-right">
+        <div className="login-theme-row">
+          <ThemeToggle />
+        </div>
+
         <div className="login-form-box">
           <h2 className="login-form-title">Welcome back</h2>
-          <p className="login-form-sub">Sign in to your account to continue</p>
+          <p className="login-form-sub">
+            Sign in to your account to continue
+          </p>
 
           <div className="login-input-wrap">
             <label className="login-label">Email Address</label>
@@ -102,10 +107,6 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={handleKeyDown}
-              autoComplete="off"
-              name="instabuy-login-email-x9k"
-              readOnly
-              onFocus={(e) => e.target.removeAttribute("readOnly")}
             />
           </div>
 
@@ -119,10 +120,6 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={handleKeyDown}
-              autoComplete="new-password"
-              name="instabuy-login-password-x9k"
-              readOnly
-              onFocus={(e) => e.target.removeAttribute("readOnly")}
             />
           </div>
 
@@ -136,7 +133,9 @@ function Login() {
                 <span className="login-spinner" />
                 Signing in...
               </>
-            ) : "Sign In →"}
+            ) : (
+              "Sign In →"
+            )}
           </button>
 
           <div className="login-divider">
@@ -147,18 +146,15 @@ function Login() {
 
           <p className="login-bottom-text">
             Don't have an account?{" "}
-            <button className="login-bottom-link" onClick={() => navigate("/")}>
+            <button
+              className="login-bottom-link"
+              onClick={() => navigate("/")}
+            >
               Sign up for free
             </button>
           </p>
         </div>
       </div>
-
-      {toast && (
-        <div className="login-toast-wrapper">
-          <Toast message={toast.message} type={toast.type} />
-        </div>
-      )}
     </div>
   );
 }

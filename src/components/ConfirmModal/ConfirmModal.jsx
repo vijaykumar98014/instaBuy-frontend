@@ -1,22 +1,16 @@
+import "./ConfirmModal.css";
+
 function ConfirmModal({ message, onConfirm, onCancel }) {
   return (
-    <div style={{
-      position: "fixed",
-      inset: 0,
-      background: "rgba(0,0,0,0.7)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }}>
-      <div style={{
-        background: "#16161f",
-        padding: "30px",
-        borderRadius: "20px"
-      }}>
-        <h3>Confirm Delete</h3>
-        <p>{message}</p>
-        <button onClick={onCancel}>Cancel</button>
-        <button onClick={onConfirm}>Delete</button>
+    <div className="modal-overlay">
+      <div className="modal-box">
+        <div className="modal-box__icon">🗑</div>
+        <h3 className="modal-box__title">Confirm Delete</h3>
+        <p className="modal-box__msg">{message}</p>
+        <div className="modal-box__btns">
+          <button className="modal-box__cancel" onClick={onCancel}>Cancel</button>
+          <button className="modal-box__delete" onClick={onConfirm}>Delete</button>
+        </div>
       </div>
     </div>
   );
