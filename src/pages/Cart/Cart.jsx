@@ -51,6 +51,54 @@ const removeItem = async (productId) => {
   }
 };
 
+const updateQuantity = async (productId, newQuantity) => {
+  if (newQuantity < 1) {
+    return;
+  }
+  try {
+    // Get current item to find price
+    const currentItem = cartItems.find(item => item.productId === productId);
+    if (!currentItem) {
+      return;
+    }
+
+    // Update local state immediately (no page refresh)
+    const updatedCart = cartItems.map(item => 
+      item.productId === productId 
+        ? { ...item, quantity: newQuantity }
+        : item
+    );
+    setCartItems(updatedCart);
+
+    // Remove the item first
+    await orderAPI.get(`/api/orders/cart/remove/${userId}/${productId}`);
+    
+    // Re-add with new quantity
+    await orderAPI.post(`/api/orders/cart/add/${userId}`, {
+      productId: productId,
+      quantity: newQuantity,
+      price: currentItem.price,
+    });
+  } catch (error) {
+    console.error("Update error:", error);
+    toast.error("Failed to update quantity");
+    // Revert if API fails
+    fetchCart();
+  }
+};
+
+const increaseQuantity = (productId, currentQty) => {
+  updateQuantity(productId, currentQty + 1);
+};
+
+const decreaseQuantity = (productId, currentQty) => {
+  if (currentQty <= 1) {
+    toast.error("Quantity cannot be less than 1");
+    return;
+  }
+  updateQuantity(productId, currentQty - 1);
+};
+
   // Place Order  
   //    Body: { shippingAddress, phone }  (matches OrderRequest DTO)
   const placeOrder = async () => {
@@ -181,19 +229,46 @@ const removeItem = async (productId) => {
                         {item.productName || item.name || `Product #${item.productId}`}
                       </div>
                       <div className="cart-item__meta">
-                        Qty: {item.quantity} &times; <span>₹{Number(item.price).toLocaleString()}</span>
+                        <span>₹{Number(item.price).toLocaleString()}</span>
                       </div>
                     </div>
-                    
-                    <div className="cart-item__subtotal">
-                      ₹{(item.price * item.quantity).toLocaleString()}
-                    </div>
-                    <button
+
+                    <div className="cart-item__right-section">
+                      
+
+                      {/* Amount */}
+                      <div className="cart-item__subtotal">
+                        ₹{(item.price * item.quantity).toLocaleString()}
+                      </div>
+
+                      {/* Quantity Controls */}
+                      <div className="cart-item__controls">
+                        <button
+                          className="cart-item__qty-btn cart-item__qty-btn--decrease"
+                          onClick={() => decreaseQuantity(item.productId, item.quantity)}
+                          title="Decrease quantity"
+                        >
+                          ➖
+                        </button>
+                        <span className="cart-item__qty-display">{item.quantity}</span>
+                        <button
+                          className="cart-item__qty-btn cart-item__qty-btn--increase"
+                          onClick={() => increaseQuantity(item.productId, item.quantity)}
+                          title="Increase quantity"
+                        >
+                          ➕
+                        </button>
+                        
+                      </div>
+                      {/* Remove Button */}
+                      <button
                         className="cart-item__remove"
                         onClick={() => removeItem(item.productId)}
-                        >
+                        title="Remove item"
+                      >
                         ❌
-                    </button>
+                      </button>
+                    </div>
                   </div>
                 ))}
 

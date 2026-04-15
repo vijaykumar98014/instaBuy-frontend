@@ -65,7 +65,7 @@ function Inventory() {
   };
 
   const addProduct = async () => {
-    if (!name || price <= 0 || quantity <= 0) { toast.error("Enter Valid inputs");; return; }
+    if (!name || price <= 0 || quantity <= 0) { toast.error("Enter Valid inputs"); return; }
     
     setSubmitting(true);
     try {

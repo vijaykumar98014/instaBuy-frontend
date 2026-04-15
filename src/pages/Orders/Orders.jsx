@@ -117,61 +117,61 @@ function OrderCard({ order, role, onCancel, onStatusUpdate, onEditOpen, onRefund
   const isCancelled = order.orderStatus?.toUpperCase() === "CANCELLED";
   const isDelivered = order.orderStatus?.toUpperCase() === "DELIVERED";
   const canAct = !isCancelled && !isDelivered;
-  
 
-const downloadReceipt = (order) => {
 
-  const items = order.items || [];
+  const downloadReceipt = (order) => {
 
-  const doc = new jsPDF();
+    const items = order.items || [];
 
-  // 🧾 Title
-  doc.setFontSize(16);
-  doc.text("TAX INVOICE", 80, 15);
+    const doc = new jsPDF();
 
-  // 🏢 Seller Info
-  doc.setFontSize(10);
-  doc.text("Sold By: InstaBuy Pvt Ltd", 14, 25);
-  doc.text("GSTIN: 22AAAAA0000A1Z5", 14, 30);
+    //  Title
+    doc.setFontSize(16);
+    doc.text("TAX INVOICE", 80, 15);
 
-  // 📦 Order Info
-  doc.text(`Order ID: ${order.orderId}`, 140, 25);
-  doc.text(`Date: ${new Date(order.orderDate).toLocaleDateString()}`, 140, 30);
+    //  Seller Info
+    doc.setFontSize(10);
+    doc.text("Sold By: InstaBuy Pvt Ltd", 14, 25);
+    doc.text("GSTIN: 22AAAAA0000A1Z5", 14, 30);
 
-  // 👤 Customer
-  doc.text("Bill To:", 14, 40);
-  doc.text(`${order.shippingAddress}`, 14, 45);
-  doc.text(`Phone: ${order.phone}`, 14, 50);
+    //  Order Info
+    doc.text(`Order ID: ${order.orderId}`, 140, 25);
+    doc.text(`Date: ${new Date(order.orderDate).toLocaleDateString()}`, 140, 30);
 
-  // 📊 Table
-  const tableData = items.map((item) => [
-    item.productName,
-    item.quantity,
-    item.price,
-    item.quantity * item.price
-  ]);
+    //  Customer
+    doc.text("Bill To:", 14, 40);
+    doc.text(`${order.shippingAddress}`, 14, 45);
+    doc.text(`Phone: ${order.phone}`, 14, 50);
 
-  autoTable(doc, {
-    startY: 60,
-    head: [["Product", "Qty", "Price", "Total"]],
-    body: tableData,
-  });
+    //  Table
+    const tableData = items.map((item) => [
+      item.productName,
+      item.quantity,
+      item.price,
+      item.quantity * item.price
+    ]);
 
-  // 💰 Total
-  const finalY = doc.lastAutoTable.finalY + 10;
+    autoTable(doc, {
+      startY: 60,
+      head: [["Product", "Qty", "Price", "Total"]],
+      body: tableData,
+    });
 
-  doc.text(`Grand Total: ₹${order.totalAmount}`, 140, finalY);
+    //  Total
+    const finalY = doc.lastAutoTable.finalY + 10;
 
-  // 💳 Payment
-  doc.text(`Payment: ${order.paymentStatus}`, 14, finalY + 10);
-  doc.text(`Status: ${order.orderStatus}`, 14, finalY + 15);
+    doc.text(`Grand Total: ₹${order.totalAmount}`, 140, finalY);
 
-  // ✍️ Signature
-  doc.text("Authorized Signatory", 140, finalY + 25);
+    //  Payment
+    doc.text(`Payment: ${order.paymentStatus}`, 14, finalY + 10);
+    doc.text(`Status: ${order.orderStatus}`, 14, finalY + 15);
 
-  // 📥 Save
-  doc.save(`invoice_${order.orderId}.pdf`);
-};
+    //  Signature
+    doc.text("Authorized Signatory", 140, finalY + 25);
+
+    //  Save
+    doc.save(`invoice_${order.orderId}.pdf`);
+  };
 
   return (
     <div className="ord-card" style={{ animationDelay: `${index * 0.06}s` }}>
@@ -260,16 +260,16 @@ const downloadReceipt = (order) => {
                   </button>
                 )}
                 {(order.orderStatus === "CONFIRMED" || order.orderStatus === "DELIVERED") && (
-    <button
-      className="ord-receipt-btn"
-      onClick={(e) => {
-        e.stopPropagation();
-        downloadReceipt(order);
-      }}
-    >
-      📄 Invice
-    </button>
-  )}
+                  <button
+                    className="ord-receipt-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadReceipt(order);
+                    }}
+                  >
+                    📄 Invice
+                  </button>
+                )}
               </>
             )}
 
@@ -338,10 +338,9 @@ function Orders() {
   const [filter, setFilter] = useState("ALL");
 
   const navigate = useNavigate();
-  const role = localStorage.getItem("role") || "USER";
+  const role = localStorage.getItem("role");
   const userId = localStorage.getItem("userId");
-  const userName = localStorage.getItem("userName");
-  const wallet = localStorage.getItem("wallet");
+  
 
   // ── GET /api/order-items/user/{userId} ────────────────────────────────────
   const fetchOrders = async () => {
@@ -366,7 +365,7 @@ function Orders() {
   // ── POST /api/order-items/cancel/{orderItemId} ────────────────────────────
 
   const cancelOrder = async (orderId) => {
-    console.log("API CALL ID:", orderId);
+    //console.log("API CALL ID:", orderId);
 
     try {
       await orderAPI.post(`/api/order-items/cancel/${orderId}`);
@@ -411,7 +410,6 @@ function Orders() {
   const refundOrder = async (orderId) => {
     try {
       await orderAPI.post(`/api/order-items/refund/${orderId}`);
-      //  FETCH LATEST WALLET FROM BACKEND
       const userRes = await userAPI.get(`/api/users/${userId}`);
       localStorage.setItem("wallet", userRes.data.wallet);
 
@@ -430,9 +428,9 @@ function Orders() {
 
   const FILTERS = ["ALL", "CREATED", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
   const filtered = (filter === "ALL"
-  ? orders
-  : orders.filter((o) => o.orderStatus?.toUpperCase() === filter)
-).sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+    ? orders
+    : orders.filter((o) => o.orderStatus?.toUpperCase() === filter)
+  ).sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
 
   const summaryCards = [
     { label: "Total Orders", value: orders.length, icon: "📋", bg: "rgba(108,99,255,0.12)", color: "#6c63ff" },

@@ -20,7 +20,7 @@ function Signup() {
       return;
     }
 
-    if (!email.includes("@gmail")) {
+    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
       toast.error("Please enter a valid email");
       return;
     }

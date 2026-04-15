@@ -324,11 +324,101 @@
   font-weight: 600;
 }
 
+/* ── Right Section (Controls, Amount, Remove) ── */
+.cart-item__right-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+/* ── Quantity Controls ── */
+.cart-item__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(108, 99, 255, 0.08);
+  border: 1px solid rgba(108, 99, 255, 0.15);
+  border-radius: 10px;
+  padding: 4px 8px;
+}
+
+.cart-item__qty-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  background: rgba(108, 99, 255, 0.12);
+  color: var(--accent);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cart-item__qty-btn:hover {
+  background: rgba(108, 99, 255, 0.25);
+  transform: scale(1.08);
+}
+
+.cart-item__qty-btn--decrease {
+  color: #f5c842;
+}
+
+.cart-item__qty-btn--decrease:hover {
+  background: rgba(245, 200, 66, 0.15);
+  color: #f5c842;
+}
+
+.cart-item__qty-btn--increase {
+  color: #43e97b;
+}
+
+.cart-item__qty-btn--increase:hover {
+  background: rgba(67, 233, 123, 0.15);
+  color: #43e97b;
+}
+
+.cart-item__qty-display {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  min-width: 20px;
+  text-align: center;
+}
+
 .cart-item__subtotal {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
   color: var(--success);
   white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* ── Remove Button ── */
+.cart-item__remove {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 77, 109, 0.3);
+  background: rgba(255, 77, 109, 0.08);
+  color: var(--danger);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.cart-item__remove:hover {
+  background: rgba(255, 77, 109, 0.2);
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
 }
 
 /* ── Shipping Notice ── */
@@ -563,26 +653,4 @@
   display: flex;
   align-items: center;
   margin-left: 10px;
-}
-
-/* ── Remove Button ── */
-.cart-item__remove {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 77, 109, 0.3);
-  background: rgba(255, 77, 109, 0.08);
-  color: var(--danger);
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s ease;
-}
-
-.cart-item__remove:hover {
-  background: rgba(255, 77, 109, 0.2);
-  transform: scale(1.1);
-  box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
 }
